@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# $Id: fakemail.pl,v 1.8 2005/02/28 19:44:13 lastcraft Exp $
+# $Id: fakemail,v 1.1 2005/03/01 15:49:31 lastcraft Exp $
 #
 use Net::Server::Mail::SMTP;
 use IO::Socket::INET;
