@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# $Id: fakemail,v 1.9 2005/03/18 03:26:35 lastcraft Exp $
+# $Id: fakemail,v 1.10 2005/03/18 15:44:00 lastcraft Exp $
 #
 use Net::Server::Mail::SMTP;
 use IO::Socket::INET;
@@ -57,7 +57,7 @@ serve();
         message('Starting fakemail');
         $server = new IO::Socket::INET(Listen => 1,
                                        Proto => 'tcp',
-                                       ReuseAddr => 1,
+                                       Reuse => 1,
                                        LocalPort => $port,
                                        LocalHost => $host);
         if (! $server) {
