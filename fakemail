@@ -1,6 +1,6 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 #
-# $Id: fakemail,v 1.7 2005/03/17 20:56:32 lastcraft Exp $
+# $Id: fakemail,v 1.8 2005/03/18 02:57:58 lastcraft Exp $
 #
 use Net::Server::Mail::SMTP;
 use IO::Socket::INET;
@@ -104,11 +104,9 @@ serve();
     sub quit {
         message('Stopping fakemail');
         if (defined($socket)) {
-            message('Closing fakemail mail socket');
             close_socket($socket);
         }
         if ($server) {
-            message('Closing fakemail listening socket');
             close_socket($server);
         }
         message('fakemail stopped');
@@ -119,14 +117,9 @@ serve();
         my $socket = shift;
         my $ret;
 
-        message('Starting to close socket');
         $ret = $socket->flush();
-        message("Return from flush() is $ret");
         $ret = $socket->shutdown(2);
-        message("Return from shutdown(2) is $ret");
         $ret = $socket->close();
-        message("Return from close() is $ret");
-        message('Done closing socket');
     }
 }
 
@@ -153,5 +146,7 @@ sub message {
         open(FILE, ">> $log.$$");
         print FILE localtime() . ": $message\n";
         close(FILE);
+    } else {
+        print "$message\n";
     }
 }
