@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# $Id: fakemail,v 1.2 2005/03/08 18:05:39 lastcraft Exp $
+# $Id: fakemail,v 1.3 2005/03/08 19:54:02 lastcraft Exp $
 #
 use Net::Server::Mail::SMTP;
 use IO::Socket::INET;
@@ -61,7 +61,7 @@ quit();
             $smtp->set_callback(RCPT => \&validate_recipient);
             $smtp->set_callback(DATA => \&queue_message);
             $smtp->process();
-            $socket->close();
+            close_socket($socket);
         }
         close_socket($server);
     }
