@@ -1,0 +1,171 @@
+<?xml version="1.0"?>
+<page title="Fakemail documentation" here="Fakemail">
+    <long_title>
+        Fakemail is a SMTP gateway replacement to make mail testing easier
+    </long_title>
+    <content>
+        <section name="what" title="What is fakemail?">
+            <p>
+                Fakemail is a dummy SMTP gateway written in Perl.
+                It's a tool for testing applications that works by acting
+                as an intercept for outgoing mails.
+            </p>
+            <p>
+                If you have had to test applications that send e-mails, for
+                example as part of a web sign up process, you will know what
+                an involved and tricky exercise that can be.
+                Usually you have to sign up with a special e-mail address,
+                have the mail go to the mail server and then real it back into
+                the test with a POP/IMAP client.
+                Besides all of the extra POP libraries you need there is also
+                the spurious failures because of mail delays and the difficulty
+                of setting all of this up for every development box.
+                That's assuming you get all of the developer machines past
+                the security that should be protecting your mail server.
+            </p>
+            <p>
+                Fakemail works by intercepting the mail before it leaves
+                the machine by replacing your mail transfer agent (MTA).
+                It's a simple script run from the command line and then
+                killed when it's captured the mails...
+<sh>
+fakemail --host=localhost --port=10025 path=temp --background
+</sh>
+                Mails are simply dumped to a directory of your choosing,
+                here the a temporary directory, complete with all of mail headers.
+                Briefly, the port parameter is the port to listen on initially,
+                the host parameter is not currently checked and
+                the background flag tells <em>fakemail</em> to run as a
+                daemon and to return the process ID of the detached process.
+            </p>
+            <p>
+                If you already have an SMTP server on your computer, then you
+                will either need to disable it to free up port 25 or use
+                another port.
+                The second option means that your mail sending library must have the
+                capability to select a port other than 25 by some sort of
+                configuration.
+            </p>
+        </section>
+        <section name="install" title="Basic installation">
+            <p>
+                There is no installation of the fakemail program itself, but
+                it does have some prerequisites.
+                The first is <a href="http://www.perl.org/">Perl</a> itself and
+                beyond the basic distribution you will also need the
+                <a href="http://cpan.perl.org">CPAN</a>
+                module <em>Net::Server::Mail::SMTP</em>.
+                Once Perl is installed you can install this module with...
+<sh>
+perl -MCPAN -e 'install Net::Server::Mail::SMTP'
+</sh>
+                For <em>fakemail</em> itself all you have to do is unpack the
+                <a href="http://sourceforge.net/projects/fakemail/">Sourceforge</a>
+                tarball and it's ready to run.
+            </p>
+            <p>
+                To confirm everything is working, we should send it an e-mail.
+                Open a terminal and start <em>fakemail</em> in the foreground...
+<sh>
+fakemail --host=localhost --port=10025 path=.
+</sh>
+                All of these arguments are required.
+                Here is what they mean:
+                <ul>
+                    <li>
+                        The host parameter names the server as <em>localhost</em>.
+                        Although required, thisis not yet acted upon.
+                    </li>
+                    <li>
+                        The port argument sets the port that <em>fakemail</em>
+                        will listen on for connections.
+                        It will listen on this port until it's process is killed.
+                        <em>fakemail</em> is a full INET server and can handle
+                        multiple simultaneous requests.
+                        Note you can only connect to ports below 1024 if you
+                        are the root user.
+                    </li>
+                    <li>
+                        The path is the directory where the captured mails will
+                        be saved.
+                        The name of the file is the &quot;to&quot; address of
+                        the incoming mail with the index appended.
+                        For example the second mail sent to &quot;me@here&quot;
+                        will be saved in the file &quot;me@here.2&quot;
+                    </li>
+                </ul>
+                That terminal is now occupied, so open another and connect with
+                <em>telnet</em> to the port we chose earlier...
+<sh>
+telnet localhost 10025
+</sh>
+                If everything is working we should see the response...
+<sh>
+Connected to localhost.localdomain (127.0.0.1).
+Escape character is '^]'.
+220 uno.home SMTP Net::Server::Mail (Perl) Service ready
+</sh>
+                We can manually enter SMTP commands to simulate a mail dispatch,
+                although we have to send them in order.
+                The commands are &quot;HELO&quot; to start the session,
+                &quot;MAIL From:&quot; to set the sender, &quot;RCPT To:&quot;
+                to set the target and &quot;DATA&quot; for the mail content
+                itself.
+                The &quot;QUIT&quot; command ends the session.
+                Here is the full conversation with our commands in bold...
+<sh><![CDATA[
+220 uno.home SMTP Net::Server::Mail (Perl) Service ready
+<strong>HELO mailer</strong>
+250 Requested mail action okay, completed
+<strong>MAIL From: me@here</strong>
+250 sender me@here OK
+<strong>RCPT To: you@there</strong>
+250 recipient you@there OK
+<strong>DATA</strong>
+354 Start mail input; end with <CRLF>.<CRLF>
+<strong>
+A-header: Sample header
+
+Hello
+.</strong>
+250 message queued
+<strong>QUIT</strong>
+221 uno.home Service closing transmission channel
+]]></sh>
+                We must enter both a carriage return and a line feed for
+                each mail header line, although most <em>telnet</em> programs
+                will do that automatically.
+            </p>
+            <p>
+                After this sequence we can stop the fakemail terminal with
+                a Control-C to interrupt the process.
+                Because we set the <em>fakemail </em>path to the local directory,
+                we should see a file labelled &quot;you@there.1&quot;.
+                Here is the contents of that file...
+<pre>
+A-header: Sample header
+
+Hello
+</pre>
+                You should now be ready to use <em>fakemail</em> to make your
+                testing easier.
+            </p>
+        </section>
+    </content>
+    <internal>
+        <link>
+            <a href="#what">What is fakemail?</a>
+        </link>
+        <link>
+            <a href="#install">Installing</a> and testing the installation.
+        </link>
+    </internal>
+    <external>
+        <link>
+        </link>
+    </external>
+    <meta>
+        <keywords>
+        </keywords>
+    </meta>
+</page>
