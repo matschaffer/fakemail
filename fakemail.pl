@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# $Id: fakemail.pl,v 1.6 2005/02/25 21:20:32 lastcraft Exp $
+# $Id: fakemail.pl,v 1.7 2005/02/28 18:47:50 lastcraft Exp $
 #
 use Net::Server::Mail::SMTP;
 use IO::Socket::INET;
@@ -28,13 +28,16 @@ $path =~ s|/$||;
 # Run in background.
 #
 if ($background) {
-    my $child = fork;
-    die ($!) unless defined ($child);
-    if ($child) {
-        print "$child";
+    my $has_child_pid = fork;
+    die ($!) unless defined ($has_child_pid);
+    if ($has_child_pid) {
+        print "$has_child_pid";
         exit;
     }
     POSIX::setsid() or die ('Cannot detach from session: $!');
+    close(STDIN);
+    close(STDOUT);
+    close(STDERR);
     $SIG{INT} = $SIG{TERM} = $SIG{HUP} = \&signals;
     $SIG{PIPE} = 'IGNORE';
 }
@@ -44,17 +47,20 @@ exit;
 # Start SMTP server.
 #
 {
-    my @local_domains = ($host);
-    my $server = new IO::Socket::INET Listen => 1, LocalPort => $port;
+    my @local_domains;
+    my $server;
     my $socket;
 
     # Start the server.
     #
     sub serve {
+        @local_domains = ($host);
+        $server = new IO::Socket::INET Listen => 1, LocalPort => $port;
         while ($socket = $server->accept) {
             my $smtp = new Net::Server::Mail::SMTP socket => $socket;
             $smtp->set_callback(RCPT => \&validate_recipient);
             $smtp->set_callback(DATA => \&queue_message);
+            $smtp->set_callback(EHLO => \&handle_ehlo);
             $smtp->process();
             $socket->close();
             $socket = undef;
@@ -83,11 +89,13 @@ exit;
         return (1, 250, "message queued");
     }
 
+    sub handle_ehlo {
+    }
+
     sub signals {
         if (defined($socket)) {
             $socket->close();
         }
-        $server->shutdown();
         $server->close();
         exit;
     }
