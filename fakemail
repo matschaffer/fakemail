@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# $Id: fakemail,v 1.5 2005/03/15 18:25:55 lastcraft Exp $
+# $Id: fakemail,v 1.6 2005/03/15 21:07:00 lastcraft Exp $
 #
 use Net::Server::Mail::SMTP;
 use IO::Socket::INET;
@@ -44,7 +44,6 @@ if ($background) {
     $SIG{PIPE} = 'IGNORE';
 }
 serve();
-quit();
 
 # SMTP server.
 #
@@ -59,6 +58,11 @@ quit();
         message('Starting fakemail');
         @local_domains = ($host);
         $server = new IO::Socket::INET Listen => 1, LocalPort => $port;
+        if (! $server) {
+            message("Cannot start fakemail: $!");
+            quit();
+        }
+        message("Listening on port $port");
         while ($socket = $server->accept) {
             message('Starting request');
             my $smtp = new Net::Server::Mail::SMTP socket => $socket;
@@ -68,8 +72,8 @@ quit();
             close_socket($socket);
             message('Request done');
         }
-        message('No socket available');
-        close_socket($server);
+        message("Cannot accept requests");
+        quit();
     }
 
     # Event handlers.
@@ -97,11 +101,14 @@ quit();
     }
 
     sub quit {
+        message('Stopping fakemail');
         if (defined($socket)) {
             close_socket($socket);
         }
-        close_socket($server);
-        message('Stopping fakemail');
+        if ($server) {
+            close_socket($server);
+        }
+        message('fakemail stopped');
         exit;
     }
 
