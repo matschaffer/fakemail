@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# $Id: fakemail,v 1.1 2005/03/01 15:49:31 lastcraft Exp $
+# $Id: fakemail,v 1.2 2005/03/08 18:05:39 lastcraft Exp $
 #
 use Net::Server::Mail::SMTP;
 use IO::Socket::INET;
@@ -18,33 +18,33 @@ GetOptions(
 
 if (! defined($host) or ! defined($port) or ! defined($path)) {
     die "Usage: ./fakemail.pl\n" .
-    "       --host=<localdomain>\n" .
-    "       --port=<port number>\n" .
-    "       --path=<path to save mails>\n" .
-    "       --background\n";
+            "       --host=<localdomain>\n" .
+            "       --port=<port number>\n" .
+            "       --path=<path to save mails>\n" .
+            "       --background\n";
 };
 $path =~ s|/$||;
 
 # Run in background.
 #
 if ($background) {
-    my $has_child_pid = fork;
-    die ($!) unless defined ($has_child_pid);
-    if ($has_child_pid) {
-        print "$has_child_pid";
+    my $child_pid = fork;
+    die ($!) unless defined ($child_pid);
+    if ($child_pid) {
+        print "$child_pid";
         exit;
     }
     POSIX::setsid() or die ('Cannot detach from session: $!');
     close(STDIN);
     close(STDOUT);
     close(STDERR);
-    $SIG{INT} = $SIG{TERM} = $SIG{HUP} = \&signals;
+    $SIG{INT} = $SIG{TERM} = $SIG{HUP} = \&quit;
     $SIG{PIPE} = 'IGNORE';
 }
 serve();
-exit;
+quit();
 
-# Start SMTP server.
+# SMTP server.
 #
 {
     my @local_domains;
@@ -62,10 +62,8 @@ exit;
             $smtp->set_callback(DATA => \&queue_message);
             $smtp->process();
             $socket->close();
-            $socket = undef;
         }
-        $server->shutdown();
-        $server->close();
+        close_socket($server);
     }
 
     # Event handlers.
@@ -88,12 +86,20 @@ exit;
         return (1, 250, "message queued");
     }
 
-    sub signals {
+    sub quit {
         if (defined($socket)) {
-            $socket->close();
+            close_socket($socket);
         }
-        $server->close();
+        close_socket($server);
         exit;
+    }
+    
+    sub close_socket {
+        my $socket = shift;
+        
+        $socket->flush();
+        $socket->shutdown();
+        $socket->close();
     }
 }
 
