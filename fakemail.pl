@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# $Id: fakemail.pl,v 1.7 2005/02/28 18:47:50 lastcraft Exp $
+# $Id: fakemail.pl,v 1.8 2005/02/28 19:44:13 lastcraft Exp $
 #
 use Net::Server::Mail::SMTP;
 use IO::Socket::INET;
@@ -60,7 +60,6 @@ exit;
             my $smtp = new Net::Server::Mail::SMTP socket => $socket;
             $smtp->set_callback(RCPT => \&validate_recipient);
             $smtp->set_callback(DATA => \&queue_message);
-            $smtp->set_callback(EHLO => \&handle_ehlo);
             $smtp->process();
             $socket->close();
             $socket = undef;
@@ -87,9 +86,6 @@ exit;
             close(FILE);
         }
         return (1, 250, "message queued");
-    }
-
-    sub handle_ehlo {
     }
 
     sub signals {
