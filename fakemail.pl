@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# $Id: fakemail.pl,v 1.2 2005/02/09 22:55:10 lastcraft Exp $
+# $Id: fakemail.pl,v 1.4 2005/02/09 22:57:36 lastcraft Exp $
 #
 use Net::Server::Mail::SMTP;
 use IO::Socket::INET;
@@ -17,7 +17,7 @@ GetOptions(
         'background'   => \$background);
 
 if (! defined($host) or ! defined($port) or ! defined($path)) {
-    die "Usage: ./fake_mail.pl\n" .
+    die "Usage: ./fakemail.pl\n" .
     "       --host=<localdomain>\n" .
     "       --port=<port number>\n" .
     "       --path=<path to save mails>\n" .
@@ -28,8 +28,8 @@ $path =~ s|/$||;
 # Run in background.
 #
 if ($background) {
-    exit if my $parent = fork;
-    die ($!) unless defined ($parent);
+    exit if my $child = fork;
+    die ($!) unless defined ($child);
     POSIX::setsid() or die ('Cannot detach from session: $!');
     print "$$\n";
     $SIG{INT} = $SIG{TERM} = $SIG{HUP} = \&signals;
