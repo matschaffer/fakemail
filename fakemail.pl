@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# $Id: fakemail.pl,v 1.5 2005/02/25 21:16:39 lastcraft Exp $
+# $Id: fakemail.pl,v 1.6 2005/02/25 21:20:32 lastcraft Exp $
 #
 use Net::Server::Mail::SMTP;
 use IO::Socket::INET;
@@ -59,6 +59,7 @@ exit;
             $socket->close();
             $socket = undef;
         }
+        $server->shutdown();
         $server->close();
     }
 
@@ -86,6 +87,7 @@ exit;
         if (defined($socket)) {
             $socket->close();
         }
+        $server->shutdown();
         $server->close();
         exit;
     }
