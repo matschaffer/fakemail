@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# $Id: fakemail.pl,v 1.3 2005/02/09 22:55:51 lastcraft Exp $
+# $Id: fakemail.pl,v 1.5 2005/02/25 21:16:39 lastcraft Exp $
 #
 use Net::Server::Mail::SMTP;
 use IO::Socket::INET;
@@ -28,12 +28,18 @@ $path =~ s|/$||;
 # Run in background.
 #
 if ($background) {
-    exit if my $parent = fork;
-    die ($!) unless defined ($parent);
+    my $child = fork;
+    die ($!) unless defined ($child);
+    if ($child) {
+        print "$child";
+        exit;
+    }
     POSIX::setsid() or die ('Cannot detach from session: $!');
-    print "$$\n";
     $SIG{INT} = $SIG{TERM} = $SIG{HUP} = \&signals;
+    $SIG{PIPE} = 'IGNORE';
 }
+serve();
+exit;
 
 # Start SMTP server.
 #
@@ -42,16 +48,19 @@ if ($background) {
     my $server = new IO::Socket::INET Listen => 1, LocalPort => $port;
     my $socket;
 
-    while ($socket = $server->accept) {
-        my $smtp = new Net::Server::Mail::SMTP socket => $socket;
-        $smtp->set_callback(RCPT => \&validate_recipient);
-        $smtp->set_callback(DATA => \&queue_message);
-        $smtp->process();
-        $socket->close();
-        $socket = undef;
+    # Start the server.
+    #
+    sub serve {
+        while ($socket = $server->accept) {
+            my $smtp = new Net::Server::Mail::SMTP socket => $socket;
+            $smtp->set_callback(RCPT => \&validate_recipient);
+            $smtp->set_callback(DATA => \&queue_message);
+            $smtp->process();
+            $socket->close();
+            $socket = undef;
+        }
+        $server->close();
     }
-    $server->close();
-    exit;
 
     # Event handlers.
     #
