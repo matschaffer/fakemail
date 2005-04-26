@@ -139,7 +139,7 @@ Hello
             <p>
                 After this sequence we can stop the fakemail terminal with
                 a Control-C to interrupt the process.
-                Because we set the <em>fakemail </em>path to the local directory,
+                Because we set the <em>fakemail</em> path to the local directory,
                 we should see a file labelled &quot;you@there.1&quot;.
                 Here is the contents of that file...
 <pre>
@@ -151,6 +151,110 @@ Hello
                 testing easier.
             </p>
         </section>
+        <section name="typical" title="A typical test case">
+            <p>
+                I am going to use a <a href="http://www.simpletest.org/">SimpleTest</a>
+                (PHP) example here, but translation to
+                <a href="http://sourceforge.net/projects/jwebunit">JWebUnit</a>
+                or <a href="http://sourceforge.net/projects/htmlunit">HtmlUnit</a>
+                should be straight forward.
+            </p>
+            <p>
+                Firstly we will need a web page to test...
+<php><![CDATA[
+<html>
+    <?php
+        require_once('class.phpmailer.php');
+        
+        if (isset($_GET['email'])) {
+            $mail = new PHPMailer();
+            $mail->from = 'test@lastcraft.com';
+            $mail->body = 'Hello';
+            $mail->host = 'localhost';
+            $mail->mailer = 'smtp';
+            $mail->port = isset($_GET['port']) ? $_GET['port'] : 25;
+            if ($mail->send()) {
+                print 'Mail sent to <em>' . $_GET['email'] . '</em><br />';
+            }
+        }
+    ?>
+    <form>
+        Enter your mail address:<br />
+        <input type=text name="email" /><br />
+        <input type="submit" value="Send" />
+    </form>
+</html>
+]]></php>
+                This is not strictly test driven develoment of course, but things
+                are easier to explain this way.
+            </p>
+            <p>
+                Because the inbuilt PHP <code>mail()</code> function does not
+                let you override the port, I am using the
+                <a href="http://sourceforge.net/projects/phpmailer/">PHPMailer library</a>.
+                This library has it's own SMTP client making the choice of port
+                easy to configure.
+                I am taking the port as an extra form parameter,
+                because we don't always have the freedom to disable mail transfer
+                agents whilst testing.
+            </p>
+            <p>
+                Now the test case...
+<php><![CDATA[
+<?php
+    class MailGreetingTest extends WebTestCase {
+    
+        function setUp() {
+            $command = 'fakemail --path=temp --host=localhost --port=10025';
+            $this->pid = `$command`;
+            @unlink('temp/marcus@lastcraft.com.1');
+        }
+        
+        function tearDown() {
+            $command = 'kill ' . $this->pid;
+            `$command`;
+            @unlink('temp/marcus@lastcraft.com.1');
+        }
+        
+        function testGreetingMailIsSent() {
+            $this->get('http://my-host/mail.php');
+            $this->setField('email', 'marcus@lastcraft.com');
+            $this->clickSubmit('Send', array('port' => 10025));
+            $this->assertWantedText('mail sent to marcus@lastcraft.com');
+            
+            $sent = file_get_contents('temp/marcus@lastcraft.com.1');
+            list($headers, $content) = split("\r\n\r\n", $sent);
+            $this->assertTrue(trim($content) == 'Hello');
+        }
+    }
+?>
+]]></php>
+                The main point of course is that <em>fakemail</em> is started
+                and stopped for each test using <code>setUp()</code> and
+                <code>tearDown()</code>.
+                In addition to keeping track of the process ID so as to
+                kill <em>fakemail</em> after each test, we also need to delete
+                the captured mails.
+                Otherwise the next mail will be saved as <em>marcus@lastcraft.com.2</em>
+                making our tests a erratic.
+            </p>
+            <p>
+                The only tricky bit in the test is the <code>clickSubmit()</code>
+                line.
+                That's where we send the extra port parameter override for
+                testing so that the mail is sent to <em>fakemail</em> rather
+                than the regular mail transfer agent.
+            </p>
+            <p>
+                The actual test itself could be improved by some obvious refactoring.
+                Creating a generic <code>MailTestCase</code> would involve
+                more useful assertions such as <code>assertMailText()</code>
+                and <code>clickMailLink()</code> for testing double opt-ins.
+                For ease of illustration, I am just picking the captured mail
+                apart to confirm the not very exciting content.
+                Hopefully your own tests will be much more interesting.
+            </p>
+        </section>
     </content>
     <internal>
         <link>
@@ -158,6 +262,9 @@ Hello
         </link>
         <link>
             <a href="#install">Installing</a> and testing the installation.
+        </link>
+        <link>
+            A <a href="#typical">Typical test case</a> using fakemail.
         </link>
     </internal>
     <external>
