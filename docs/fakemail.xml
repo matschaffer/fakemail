@@ -142,11 +142,11 @@ Hello
                 Because we set the <em>fakemail</em> path to the local directory,
                 we should see a file labelled &quot;you@there.1&quot;.
                 Here is the contents of that file...
-<pre>
+<file>
 A-header: Sample header
 
 Hello
-</pre>
+</file>
                 You should now be ready to use <em>fakemail</em> to make your
                 testing easier.
             </p>
@@ -163,7 +163,7 @@ Hello
                 Firstly we will need a web page to test...
 <php><![CDATA[
 <html>
-    <?php
+    <?php<strong>
         require_once('class.phpmailer.php');
         
         if (isset($_GET['email'])) {
@@ -176,7 +176,7 @@ Hello
             if ($mail->send()) {
                 print 'Mail sent to <em>' . $_GET['email'] . '</em><br />';
             }
-        }
+        }</strong>
     ?>
     <form>
         Enter your mail address:<br />
@@ -186,7 +186,7 @@ Hello
 </html>
 ]]></php>
                 This is not strictly test driven develoment of course, but things
-                are easier to explain this way.
+                are easier to explain if I show the script first.
             </p>
             <p>
                 Because the inbuilt PHP <code>mail()</code> function does not
@@ -204,15 +204,15 @@ Hello
 <?php
     class MailGreetingTest extends WebTestCase {
     
-        function setUp() {
+        function setUp() {<strong>
             $command = 'fakemail --path=temp --host=localhost --port=10025';
-            $this->pid = `$command`;
+            $this->pid = `$command`;</strong>
             @unlink('temp/marcus@lastcraft.com.1');
         }
         
-        function tearDown() {
+        function tearDown() {<strong>
             $command = 'kill ' . $this->pid;
-            `$command`;
+            `$command`;</strong>
             @unlink('temp/marcus@lastcraft.com.1');
         }
         
@@ -221,8 +221,8 @@ Hello
             $this->setField('email', 'marcus@lastcraft.com');
             $this->clickSubmit('Send', array('port' => 10025));
             $this->assertWantedText('mail sent to marcus@lastcraft.com');
-            
-            $sent = file_get_contents('temp/marcus@lastcraft.com.1');
+            <strong>
+            $sent = file_get_contents('temp/marcus@lastcraft.com.1');</strong>
             list($headers, $content) = split("\r\n\r\n", $sent);
             $this->assertTrue(trim($content) == 'Hello');
         }
@@ -269,6 +269,11 @@ Hello
     </internal>
     <external>
         <link>
+            The <a href="http://sourceforge.net/projects/fakemail">fakemail Sourceforge page</a>.
+        </link>
+        <link>
+            John Pye has written a
+            <a href="http://www.curioussymbols.com/simplemail/">PHP test case around fakemail</a>.
         </link>
     </external>
     <meta>
