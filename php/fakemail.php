@@ -2,13 +2,21 @@
     /**
      *	simple PHP class that incapsulates fakemail server stop, start and some utility routines
      *	@package	FakeMail
-     *	@version	$Id: fakemail.php,v 1.2 2005/04/28 09:45:20 pachanga Exp $
+     *	@version	$Id: fakemail.php,v 1.3 2005/04/28 12:23:08 pachanga Exp $
      */
 
-    @define('FAKE_MAIL_SCRIPT', dirname(__FILE__) . '/../fakemail');
-    @define('FAKE_MAIL_PORT', 25);
-    @define('FAKE_MAIL_HOST', 'localhost');
-    @define('FAKE_MAIL_DUMP_PATH', dirname(__FILE__) . '/');
+    if(!defined('FAKE_MAIL_SCRIPT')) {
+        define('FAKE_MAIL_SCRIPT', dirname(__FILE__) . '/../fakemail');
+    }
+    if(!defined('FAKE_MAIL_PORT')) {
+        define('FAKE_MAIL_PORT', 25);
+    }
+    if(!defined('FAKE_MAIL_HOST')) {
+        define('FAKE_MAIL_HOST', 'localhost');
+    }
+    if(!defined('FAKE_MAIL_DUMP_PATH')) {
+        define('FAKE_MAIL_DUMP_PATH', dirname(__FILE__) . '/');
+    }
 
     class FakeMailDaemon {
         var $pid = null;
