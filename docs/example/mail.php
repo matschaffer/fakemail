@@ -1,9 +1,11 @@
 <html>
     <?php
         require_once('class.phpmailer.php');
+        require_once('class.smtp.php');
         
         if (isset($_GET['email'])) {
             $mail = new PHPMailer();
+            $mail->addAddress($_GET['email']);
             $mail->from = 'test@lastcraft.com';
             $mail->body = 'Hello';
             $mail->host = 'localhost';
@@ -16,7 +18,7 @@
     ?>
     <form>
         Enter your mail address:<br />
-        <input type=text name="email" /><br />
+        <input type="text" name="email" /><br />
         <input type="submit" value="Send" />
     </form>
 </html>

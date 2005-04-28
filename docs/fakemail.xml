@@ -220,7 +220,7 @@ Hello
             $this->get('http://my-host/mail.php');
             $this->setField('email', 'marcus@lastcraft.com');
             $this->clickSubmit('Send', array('port' => 10025));
-            $this->assertWantedText('mail sent to marcus@lastcraft.com');
+            $this->assertWantedText('Mail sent to marcus@lastcraft.com');
             <strong>
             $sent = file_get_contents('temp/marcus@lastcraft.com.1');</strong>
             list($headers, $content) = split("\r\n\r\n", $sent);
@@ -273,7 +273,7 @@ Hello
         </link>
         <link>
             John Pye has written a
-            <a href="http://www.curioussymbols.com/simplemail/">PHP test case around fakemail</a>.
+            <a href="http://www.curioussymbols.com/simplemail/">PHP mail test case around fakemail</a>.
         </link>
     </external>
     <meta>
