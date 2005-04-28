@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <page title="Fakemail documentation" here="Fakemail">
     <long_title>
-        Fakemail is a SMTP gateway replacement to make mail testing easier
+        Fakemail is an SMTP gateway replacement to make mail testing easier
     </long_title>
     <content>
         <section name="what" title="What is fakemail?">
@@ -32,7 +32,7 @@
 fakemail --host=localhost --port=10025 path=temp --background
 </sh>
                 Mails are simply dumped to a directory of your choosing,
-                here the a temporary directory, complete with all of mail headers.
+                here the a temporary directory, complete with all of the mail headers.
                 Briefly, the port parameter is the port to listen on initially,
                 the host parameter is not currently checked and
                 the background flag tells <em>fakemail</em> to run as a
