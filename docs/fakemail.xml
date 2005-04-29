@@ -163,24 +163,27 @@ Hello
                 Firstly we will need a web page to test...
 <php><![CDATA[
 <html>
-    <?php<strong>
+    <?php
         require_once('class.phpmailer.php');
+        require_once('class.smtp.php');
         
-        if (isset($_GET['email'])) {
+        if ($_GET['email']) {<strong>
             $mail = new PHPMailer();
-            $mail->from = 'test@lastcraft.com';
-            $mail->body = 'Hello';
-            $mail->host = 'localhost';
-            $mail->mailer = 'smtp';
-            $mail->port = isset($_GET['port']) ? $_GET['port'] : 25;
+            $mail->addAddress(trim($_GET['email']));
+            $mail->From = 'test@lastcraft.com';
+            $mail->Body = 'Hi!';
+            $mail->Subject = 'Hello';
+            $mail->Mailer = 'smtp';
+            $mail->Host = 'localhost';
+            $mail->Port = isset($_GET['port']) ? $_GET['port'] : 25;
             if ($mail->send()) {
                 print 'Mail sent to <em>' . $_GET['email'] . '</em><br />';
-            }
-        }</strong>
+            }</strong>
+        }
     ?>
     <form>
         Enter your mail address:<br />
-        <input type=text name="email" /><br />
+        <input type="text" name="email" /><br />
         <input type="submit" value="Send" />
     </form>
 </html>
@@ -202,31 +205,37 @@ Hello
                 Now the test case...
 <php><![CDATA[
 <?php
+    require_once('simpletest/web_tester.php');
+    require_once('simpletest/reporter.php');
+    
     class MailGreetingTest extends WebTestCase {
     
         function setUp() {<strong>
-            $command = 'fakemail --path=temp --host=localhost --port=10025';
+            $command = './fakemail --path=. --host=localhost --port=10025 --background';
             $this->pid = `$command`;</strong>
-            @unlink('temp/marcus@lastcraft.com.1');
+            @unlink('marcus@localhost.1');
         }
         
         function tearDown() {<strong>
             $command = 'kill ' . $this->pid;
             `$command`;</strong>
-            @unlink('temp/marcus@lastcraft.com.1');
+            @unlink('marcus@localhost.1');
         }
         
         function testGreetingMailIsSent() {
-            $this->get('http://my-host/mail.php');
-            $this->setField('email', 'marcus@lastcraft.com');
+            $this->get('http://localhost/fakemail/docs/example/mail.php');
+            $this->setField('email', 'marcus@localhost');
             $this->clickSubmit('Send', array('port' => 10025));
-            $this->assertWantedText('Mail sent to marcus@lastcraft.com');
+            $this->assertWantedText('Mail sent to marcus@localhost');
             <strong>
-            $sent = file_get_contents('temp/marcus@lastcraft.com.1');</strong>
+            $sent = file_get_contents('marcus@localhost.1');</strong>
             list($headers, $content) = split("\r\n\r\n", $sent);
-            $this->assertTrue(trim($content) == 'Hello');
+            $this->assertTrue(trim($content) == 'Hi!');
         }
     }
+    
+    $test = new MailGreetingTest();
+    $test->run(new HtmlReporter());
 ?>
 ]]></php>
                 The main point of course is that <em>fakemail</em> is started
@@ -237,6 +246,8 @@ Hello
                 the captured mails.
                 Otherwise the next mail will be saved as <em>marcus@lastcraft.com.2</em>
                 making our tests a erratic.
+                The local directory needs to be wroteable by the web server for
+                this to work.
             </p>
             <p>
                 The only tricky bit in the test is the <code>clickSubmit()</code>

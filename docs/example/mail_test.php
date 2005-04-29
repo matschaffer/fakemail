@@ -5,27 +5,26 @@
     class MailGreetingTest extends WebTestCase {
     
         function setUp() {
-            $command = 'fakemail --path=. --host=localhost --port=10025 --background --log=log';
+            $command = './fakemail --path=. --host=localhost --port=10025 --background';
             $this->pid = `$command`;
-            @unlink('temp/marcus@lastcraft.com.1');
+            @unlink('marcus@localhost.1');
         }
         
         function tearDown() {
             $command = 'kill ' . $this->pid;
             `$command`;
-            //@unlink('temp/marcus@lastcraft.com.1');
+            @unlink('marcus@localhost.1');
         }
         
         function testGreetingMailIsSent() {
             $this->get('http://localhost/fakemail/docs/example/mail.php');
-            $this->setField('email', 'marcus@lastcraft.com');
+            $this->setField('email', 'marcus@localhost');
             $this->clickSubmit('Send', array('port' => 10025));
-            $this->assertWantedText('Mail sent to marcus@lastcraft.com');
-            $this->showSource();
+            $this->assertWantedText('Mail sent to marcus@localhost');
             
-            $sent = file_get_contents('marcus@lastcraft.com.1');
+            $sent = file_get_contents('marcus@localhost.1');
             list($headers, $content) = split("\r\n\r\n", $sent);
-            $this->assertTrue(trim($content) == 'Hello');
+            $this->assertTrue(trim($content) == 'Hi!');
         }
     }
     

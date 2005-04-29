@@ -3,14 +3,15 @@
         require_once('class.phpmailer.php');
         require_once('class.smtp.php');
         
-        if (isset($_GET['email'])) {
+        if ($_GET['email']) {
             $mail = new PHPMailer();
-            $mail->addAddress($_GET['email']);
-            $mail->from = 'test@lastcraft.com';
-            $mail->body = 'Hello';
-            $mail->host = 'localhost';
-            $mail->mailer = 'smtp';
-            $mail->port = isset($_GET['port']) ? $_GET['port'] : 25;
+            $mail->addAddress(trim($_GET['email']));
+            $mail->From = 'test@lastcraft.com';
+            $mail->Body = 'Hi!';
+            $mail->Subject = 'Hello';
+            $mail->Mailer = 'smtp';
+            $mail->Host = 'localhost';
+            $mail->Port = isset($_GET['port']) ? $_GET['port'] : 25;
             if ($mail->send()) {
                 print 'Mail sent to <em>' . $_GET['email'] . '</em><br />';
             }

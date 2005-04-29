@@ -5,3 +5,4 @@ tar -zcf fakemail.tar.gz fakemail/fakemail \
                          fakemail/docs/index.html \
                          fakemail/docs/docs.css
 mv fakemail.tar.gz fakemail/
+cd fakemail
