@@ -29,7 +29,7 @@
                 It's a simple script run from the command line and then
                 killed when it's captured the mails...
 <sh>
-fakemail --host=localhost --port=10025 path=temp --background
+fakemail --host=localhost --port=10025 --path=temp --background
 </sh>
                 Mails are simply dumped to a directory of your choosing,
                 here the a temporary directory, complete with all of the mail headers.
@@ -67,7 +67,7 @@ perl -MCPAN -e 'install Net::Server::Mail::SMTP'
                 To confirm everything is working, we should send it an e-mail.
                 Open a terminal and start <em>fakemail</em> in the foreground...
 <sh>
-fakemail --host=localhost --port=10025 path=.
+fakemail --host=localhost --port=10025 --path=.
 </sh>
                 All of these arguments are required.
                 Here is what they mean:
