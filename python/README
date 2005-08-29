@@ -1,0 +1,24 @@
+README
+======
+
+OVERVIEW
+
+fakemail is a fake mail server that captures emails as files for acceptance
+testing. This avoids the excessive configuration of setting up a real mail
+server and trying to extract mail queue content.
+
+This is the Python implementation of fakemail. The original version is
+written in Perl. Both versions are available from the fakemail project web
+site. See http://fakemail.sourceforge.net/ for more details.
+
+INSTALLATION
+
+To install the Python version of fakemail run the following command:
+
+    # python setup.py install
+
+You will need superuser privileges if you choose to install it to the
+default location. Alternatively, install it to a directory of your choice
+using the prefix option:
+
+    $ python setup.py install --prefix=/my/path
