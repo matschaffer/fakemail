@@ -6,33 +6,42 @@
     <content>
         <section name="what" title="What is fakemail?">
             <p>
-                Fakemail is a dummy SMTP gateway written in Perl.
-                It's a tool for testing applications that works by acting
-                as an intercept for outgoing mails.
+                fakemail is a fake mail server that captures emails as
+                files for acceptance testing. This avoids the excessive 
+                configuration of setting up a real mail server and trying
+                to extract mail queue content.
+            </p>
+            <p>
+	        There are two versions of Fakemail, the first written in
+                Perl and the second written in Python. Their features are
+                identical. We maintain two versions simply because the
+                Perl version will be more suitable for some users, whilst
+                the Python version will be more suitable for others.
             </p>
             <p>
                 If you have had to test applications that send e-mails, for
                 example as part of a web sign up process, you will know what
                 an involved and tricky exercise that can be.
                 Usually you have to sign up with a special e-mail address,
-                have the mail go to the mail server and then real it back into
+                have the mail go to the mail server and then read it back into
                 the test with a POP/IMAP client.
-                Besides all of the extra POP libraries you need there is also
-                the spurious failures because of mail delays and the difficulty
-                of setting all of this up for every development box.
-                That's assuming you get all of the developer machines past
-                the security that should be protecting your mail server.
+                There are several downsides to this approach; you need to
+                install extra software to interact with the POP server, you
+                suffer from spurious failures due to reliance on external
+                infrastructure, and it is very very slow.
             </p>
             <p>
                 Fakemail works by intercepting the mail before it leaves
-                the machine by replacing your mail transfer agent (MTA).
-                It's a simple script run from the command line and then
-                killed when it's captured the mails...
+                the machine by replacing your Mail Transfer Agent (MTA).
+
+                It's a simple script run from the command line that
+                you can launch from within your test framework.
 <sh>
 fakemail --host=localhost --port=10025 --path=temp --background
 </sh>
                 Mails are simply dumped to a directory of your choosing,
-                here the a temporary directory, complete with all of the mail headers.
+                here the a temporary directory, complete with all of the
+                mail headers.
                 Briefly, the port parameter is the port to listen on initially,
                 the host parameter is not currently checked and
                 the background flag tells <em>fakemail</em> to run as a
@@ -42,12 +51,13 @@ fakemail --host=localhost --port=10025 --path=temp --background
                 If you already have an SMTP server on your computer, then you
                 will either need to disable it to free up port 25 or use
                 another port.
-                The second option means that your mail sending library must have the
-                capability to select a port other than 25 by some sort of
-                configuration.
+
+                The second option means that your mail sending library must 
+                have the capability to select a port other than 25 by some 
+                sort of configuration.
             </p>
         </section>
-        <section name="install" title="Basic installation">
+        <section name="install" title="Installing the Perl Version">
             <p>
                 There is no installation of the fakemail program itself, but
                 it does have some prerequisites.
@@ -60,21 +70,54 @@ fakemail --host=localhost --port=10025 --path=temp --background
 perl -MCPAN -e 'install Net::Server::Mail::SMTP'
 </sh>
                 For <em>fakemail</em> itself all you have to do is unpack the
-                <a href="http://sourceforge.net/projects/fakemail/">Sourceforge</a>
+                <a href="http://sourceforge.net/projects/fakemail/">SourceForge</a>
                 tarball and it's ready to run.
             </p>
+        </section>
+        <section name="install" title="Installing the Python Version">
             <p>
-                To confirm everything is working, we should send it an e-mail.
-                Open a terminal and start <em>fakemail</em> in the foreground...
+	        There are <a href="http://sourceforge.net/project/showfiles.php?group_id=130951&package_id=168675">3 packages</a>
+                to choose from, depending on your operating system. Only
+                the use of the source package will be discussed here 
+                (the use of the Windows package should be self explanatory).
+                Untar the package, then run the following command:
+                <sh># python setup.py install</sh>
+            </p>
+            <p>
+                That will install the fakemail.py script into the
+                standard location, probably /usr/bin. You can install
+                it somewhere else by specifying the --prefix option as
+                follows (recommended):
+                <sh># python setup.py install --prefix=/usr/local</sh>
+            </p>
+        </section>
+        <section name="install" title="Testing the Installation">
+            <p>
+                To confirm everything is working, we should send it an
+                e-mail. Note that the Perl and Python versions have
+                slightly different names to ensure that you can safely
+                install them both alongside each other.
+            </p>
+            <p>
+	        To start the Perl version open a terminal and type:
 <sh>
 fakemail --host=localhost --port=10025 --path=.
 </sh>
+            </p>
+            <p>
+                To start the Python version type:
+<sh>
+fakemail.py --host=localhost --port=10025 --path=.
+</sh>
+            </p>
                 All of these arguments are required.
-                Here is what they mean:
+            
+                This is what they mean:
                 <ul>
                     <li>
-                        The host parameter names the server as <em>localhost</em>.
-                        Although required, thisis not yet acted upon.
+                        The host parameter names the server as
+                        <em>localhost</em>. Although required, this is not
+                        yet acted upon.
                     </li>
                     <li>
                         The port argument sets the port that <em>fakemail</em>
@@ -112,7 +155,10 @@ Escape character is '^]'.
                 to set the target and &quot;DATA&quot; for the mail content
                 itself.
                 The &quot;QUIT&quot; command ends the session.
-                Here is the full conversation with our commands in bold...
+                Here is the full conversation with our commands in bold,
+                demonstrated using the Perl version (the output from the
+                Python version is slightly different, but the essence is
+                the same).
 <sh><![CDATA[
 220 uno.home SMTP Net::Server::Mail (Perl) Service ready
 <strong>HELO mailer</strong>
@@ -283,7 +329,7 @@ Hello
     </internal>
     <external>
         <link>
-            The <a href="http://sourceforge.net/projects/fakemail">fakemail Sourceforge page</a>.
+            The <a href="http://sourceforge.net/projects/fakemail">fakemail SourceForge page</a>.
         </link>
         <link>
             John Pye has written a
