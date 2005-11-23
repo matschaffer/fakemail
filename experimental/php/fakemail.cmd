@@ -1,0 +1,1 @@
+C:\Programme\PHP\cli\php.exe -q fakemail.php %1 %2 %3 %4 %5 %6

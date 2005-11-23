@@ -1,0 +1,1 @@
+C:\Programme\PHP\cli\php.exe -q send.php %1 %2 %3 %4 %5 %6
