@@ -7,8 +7,9 @@
     var $port;
     var $log;
     var $path;
-    var $debug;
-    var $shutdown;
+    var $verbosity;
+    var $stop;
+    var $background;
 
     /**
      * Return the config array.
@@ -49,12 +50,13 @@
       } else
       {
         // Read opts
-        $this->debug = strtolower($args->getValue('log')) == 'yes';
+        $this->verbosity = intval($args->getValue('verbosity'));
         $this->log = $args->getValue('log');
         $this->host = $args->getValue('host');
         $this->port = intval($args->getValue('port'));
         $this->path = $args->getValue('path');
         $this->stop = $args->getValue('stop');
+        $this->background = $args->getValue('background');
       }
     }
 
@@ -75,12 +77,12 @@
     {
       $configArray = array();
 
-      //debug
-      $configArray['denug'] = array('short' => 'd',
+      //verbosity
+      $configArray['verbosity'] = array('short' => 'v',
                                     'min'   => 1,
                                     'max'   => 1,
-                                    'desc'  => 'Be more verbose with logging (yes | no)',
-                                    'default' => 'no'
+                                    'desc'  => 'Be more verbose with logging (0 - 3)',
+                                    'default' => '0'
                                     );
 
       //log
@@ -111,6 +113,13 @@
                                         'desc'    => 'Path to write mails to',
                                         'default' => dirname(__FILE__).'/data'
                                         );
+
+      //background
+      $configArray['background'] = array( 'short'   => 'b',
+                                    'min'     => 0,
+                                    'max'     => 0,
+                                    'desc'    => 'Start server in background (prints the pid to stdout)'
+                                   );
       //stop
       $configArray['stop'] = array( 'short'   => 's',
                                     'min'     => 0,

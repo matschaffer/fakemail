@@ -1,0 +1,27 @@
+OVERVIEW
+
+fakemail is a fake mail server that captures emails as files for acceptance
+testing. This avoids the excessive configuration of setting up a real mail
+server and trying to extract mail queue content.
+
+This is the PHP implementation of fakemail. The original version is
+written in Perl. Both versions are available from the fakemail project web
+site. See http://fakemail.sourceforge.net/ for more details.
+
+INSTALLATION
+
+Just copy the files to a directory and adjust the path to your PHP-Cli in
+fakemail.php for *nix and fakemail.cmd for windows. You might need to install
+ext/sockets.
+
+USAGE
+
+    # ./fakemail.php --help
+    
+    or
+    
+    # fakemail --help
+
+REMARKS
+
+The --background switch requires ext/pcntl 

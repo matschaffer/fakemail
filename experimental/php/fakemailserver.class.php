@@ -3,7 +3,6 @@
   require_once("external/patserver.class.php");
 
   /**
-  * @access   public
   * @version  0.1
   */
   class FakeMailServer extends patServer
@@ -11,24 +10,25 @@
     var $users = array();
     var $lineFeed = "\n";
     var $recipients = array();
-    var $log = '';
-    var $path = '';
-    var $verbose = false;
+    var $logfile = '';
+    var $mailpath = '';
+    var $verbosity = 0;
 
     /**
     * server is started
     *
     * @access private
     */
-    function FakeMailServer($domain = "localhost", $port = 9090, $path = '', $log = '', $debug = false)
+    function FakeMailServer($domain = "localhost", $port = 9090, $mailpath = '', $logfile = '', $verbosity = 0)
     {
       $this->patServer($domain, $port);
-      $this->log = $log;
-      $this->path = $path;
-      $this->verbose = ($log != '');
-      $this->debug = $debug;
-      $this->debugDest = ($log != '') ? $log : 'stdout';
+      $this->logfile = $logfile;
+      $this->mailpath = $mailpath;
+      $this->verbosity = $verbosity;
+      $this->debug = ($verbosity > 2);
+      $this->debugDest = ($logfile != '') ? $logfile : 'stdout';
     }
+
 
     /**
     * send a log message
@@ -36,16 +36,20 @@
     * @access private
     * @param  string
     */
-    function sendLogMessage($msg)
+    function sendLogMessage($msg, $verbosity = 1)
     {
+      if ($verbosity > $this->verbosity)
+      {
+        return false;
+      }
       $msg = date("Y-m-d H:i:s", time())." ".$msg."\n";
-      if( $this->log == "")
+      if( $this->logfile == "")
       {
         echo $msg;
         flush();
       } else
       {
-        error_log($msg, 3, $this->log);
+        error_log($msg, 3, $this->logfile);
       }
       return true;
     }
@@ -75,15 +79,15 @@
         {
           $filename.= ".1";
         }
-        if ($this->path != '')
+        if ($this->mailpath != '')
         {
-          $filename = $this->path.'/'.$filename;
+          $filename = $this->mailpath.'/'.$filename;
         }
         if (file_exists($filename))
         {
           unlink($filename);
         }
-        $this->sendLogMessage("Writing mail for ".$to.' to '.basename($filename));
+        $this->sendLogMessage("Writing mail for ".$to.' to '.basename($filename), 2);
         $fh = fopen($filename, "w");
         fwrite($fh, $this->users[$clientId]['body']);
         fclose($fh);
@@ -99,6 +103,9 @@
     */
     function stop()
     {
+      $this->sendLogMessage("Connecting to server ".$this->domain, 2);
+      $errno = 0;
+      $errstr = '';
       $connection = @fsockopen($this->domain,
                               $this->port,
                               $errno,
@@ -106,6 +113,7 @@
                               4);
       if(empty($connection))
       {
+      $this->sendLogMessage("Connecting to server ".$this->domain." failed!", 2);
         return false;
       }
       if(substr(PHP_OS, 0, 3) != "WIN")
@@ -123,6 +131,7 @@
       }
       fputs($connection, "HALT\n");
       fclose($connection);
+      $this->sendLogMessage("Issued HALT to server ".$this->domain, 2);
       return true;
     }
 
@@ -134,7 +143,7 @@
     */
     function onStart()
     {
-      $this->sendLogMessage("FakeMail started.");
+      $this->sendLogMessage("FakeMail started at {$this->domain}:{$this->port}.");
     }
 
 
@@ -175,7 +184,8 @@
     */
     function onClose($clientId)
     {
-      $this->sendLogMessage("Client disconnected.");
+      $client = $this->getClientInfo($clientId);
+      $this->sendLogMessage("Client disconnected from {$client['host']}:{$client['port']}.");
       unset($this->users[$clientId]);
     }
 
@@ -188,7 +198,8 @@
     */
     function onConnect($clientId)
     {
-      $this->sendLogMessage("Client connected.");
+    $client = $this->getClientInfo($clientId);
+      $this->sendLogMessage("Client connected from {$client['host']}:{$client['port']}.");
       $this->sendData($clientId, "220 READY (PHP FakeMail Service ready)".$this->lineFeed);
       $this->users[$clientId]['from'] = '';
       $this->users[$clientId]['to'] = array();
@@ -202,7 +213,7 @@
     *
     * @access private
     */
-    function onShutdown()
+    function afterShutdown()
     {
       $this->sendLogMessage("FakeMail stopped.");
     }
@@ -216,6 +227,8 @@
     */
     function onConnectionRefused( $clientId )
     {
+      $client = $this->getClientInfo($clientId);
+      $this->sendLogMessage("Connection refused for {$client['host']}:{$client['port']}.");
     }
 
 
@@ -229,7 +242,10 @@
     */
     function handleCommand($clientId, $command, $params)
     {
-      switch(strtoupper($command))
+      $command = strtoupper($command);
+      $client = $this->getClientInfo($clientId);
+      $this->sendLogMessage("Handling command {$command} for {$client['host']}:{$client['port']}.", 2);
+      switch($command)
       {
         case  "QUIT":
           $this->sendData($clientId, "221 QUIT (FakeMail Service closing transmission channel)".$this->lineFeed);
