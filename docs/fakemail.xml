@@ -57,7 +57,7 @@ fakemail --host=localhost --port=10025 --path=temp --background
                 sort of configuration.
             </p>
         </section>
-        <section name="install" title="Installing the Perl Version">
+        <section name="perl" title="Installing the Perl Version">
             <p>
                 There is no installation of the fakemail program itself, but
                 it does have some prerequisites.
@@ -74,9 +74,9 @@ perl -MCPAN -e 'install Net::Server::Mail::SMTP'
                 tarball and it's ready to run.
             </p>
         </section>
-        <section name="install" title="Installing the Python Version">
+        <section name="python" title="Installing the Python Version">
             <p>
-	        There are <a href="http://sourceforge.net/project/showfiles.php?group_id=130951&package_id=168675">3 packages</a>
+                There are <a href="http://sourceforge.net/project/showfiles.php?group_id=130951&amp;package_id=168675">3 packages</a>
                 to choose from, depending on your operating system. Only
                 the use of the source package will be discussed here 
                 (the use of the Windows package should be self explanatory).
@@ -109,9 +109,9 @@ fakemail --host=localhost --port=10025 --path=.
 <sh>
 fakemail.py --host=localhost --port=10025 --path=.
 </sh>
-            </p>
                 All of these arguments are required.
-            
+            </p>
+            <p>
                 This is what they mean:
                 <ul>
                     <li>
@@ -321,7 +321,13 @@ Hello
             <a href="#what">What is fakemail?</a>
         </link>
         <link>
-            <a href="#install">Installing</a> and testing the installation.
+            <a href="#perl">Installing</a> the Perl version.
+        </link>
+        <link>
+            <a href="#python">Installing</a> the Python version.
+        </link>
+        <link>
+            <a href="#install">Testing the installation</a>.
         </link>
         <link>
             A <a href="#typical">Typical test case</a> using fakemail.
