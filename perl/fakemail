@@ -15,6 +15,7 @@ GetOptions(
         'port=i' => \$port,
         'path=s' => \$path,
         'log=s' => \$log,
+        'onlylog' => \$onlylog,
         'background' => \$background);
 
 if (! defined($host) or ! defined($port) or ! defined($path)) {
@@ -23,6 +24,7 @@ if (! defined($host) or ! defined($port) or ! defined($path)) {
             "       --port=<port number>\n" .
             "       --path=<path to save mails>\n" .
             "       --log=<optional file to append messages to>\n" .
+            "       --onlylog\n" .
             "       --background\n";
 };
 $path =~ s|/$||;
@@ -93,11 +95,15 @@ serve();
         my $sender = $session->get_sender();
         my @recipients = $session->get_recipients();
         foreach my $recipient (@recipients) {
-            message("Capturing mail to $recipient");
-            open(FILE, "> " . get_filename_from_recipient($recipient));
-            print FILE ${$data};
-            close(FILE);
-            message("Mail to $recipient saved");
+						if ($onlylog) {
+								message("Mail destined for $recipient");
+						} else {
+            		message("Capturing mail to $recipient");
+            		open(FILE, "> " . get_filename_from_recipient($recipient));
+            		print FILE ${$data};
+            		close(FILE);
+            		message("Mail to $recipient saved");
+            }
         }
         message("Incoming mail dispatched");
         return (1, 250, "message queued");

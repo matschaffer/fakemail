@@ -25,15 +25,18 @@ class FakeServer(smtpd.SMTPServer):
     def process_message(self, peer, mailfrom, rcpttos, data):
         message("Incoming mail")
         for recipient in rcpttos:
-            message("Capturing mail to %s" % recipient)
-            count = self.RECIPIENT_COUNTER.get(recipient, 0) + 1
-            self.RECIPIENT_COUNTER[recipient] = count
-            filename = os.path.join(self.path, "%s.%s" % (recipient, count))
-            filename = filename.replace("<", "").replace(">", "")
-            f = file(filename, "w")
-            f.write(data + "\n")
-            f.close()
-            message("Mail to %s saved" % recipient)
+            if onlylog:
+                message("Mail destined for %s" % recipient)
+            else:
+                message("Capturing mail to %s" % recipient)
+                count = self.RECIPIENT_COUNTER.get(recipient, 0) + 1
+                self.RECIPIENT_COUNTER[recipient] = count
+                filename = os.path.join(self.path, "%s.%s" % (recipient, count))
+                filename = filename.replace("<", "").replace(">", "")
+                f = file(filename, "w")
+                f.write(data + "\n")
+                f.close()
+                message("Mail to %s saved" % recipient)
         message("Incoming mail dispatched")
 
 
@@ -45,6 +48,7 @@ OPTIONS
         --port=<port number>
         --path=<path to save mails>
         --log=<optional file to append messages to>
+        --onlylog
         --background"""
 
 
@@ -58,7 +62,7 @@ def quit(reason=None):
 
 
 log_file = None
-
+onlylog = False
 
 def message(text):
     global log_file
@@ -80,10 +84,10 @@ def handle_signals():
 
 
 def read_command_line():
-    global log_file
+    global log_file, onlylog
     try:
         optlist, args = getopt.getopt(sys.argv[1:], "",
-            ["host=", "port=", "path=", "log=", "background"])
+            ["host=", "port=", "path=", "log=", "onlylog", "background"])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -101,6 +105,8 @@ def read_command_line():
             path = arg
         elif opt == "--log":
             log_file = arg
+        elif opt == "--onlylog":
+            onlylog = True
         elif opt == "--background":
             background = True
     return host, port, path, background
